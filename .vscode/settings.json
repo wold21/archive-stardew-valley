@@ -1,0 +1,10 @@
+{
+    "search.exclude": {
+        "**/.yarn": true,
+        "**/.pnp.*": true
+    },
+    "css.lint.unknownAtRules": "ignore",
+    "tailwindCSS.experimental.configFile": "src/app/globals.css",
+    "tailwindCSS.classAttributes": ["class", "className"],
+    "css.customData": [".vscode/tailwind.json"]
+}
