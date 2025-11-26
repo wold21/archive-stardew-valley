@@ -11,7 +11,7 @@ export default function Home() {
                 <span className='text-white text-2xl'>⚙️</span>
             </div>
             <div className="h-screen bg-forest bg-cover bg-center bg-fixed overflow-y-auto">
-                <div className="mx-auto p-6">
+                <div className="p-6">
                     <div className="columns-2 md:columns-3 lg:columns-5 gap-4 space-y-4">
                         {playImages.map(item => (
                             <Card key={item.id} id={item.id} src={item.src} />

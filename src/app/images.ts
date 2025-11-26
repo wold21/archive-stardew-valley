@@ -69,6 +69,10 @@ const playImages = [
   {"id": 68, "src": "/assets/play_images/68.png"},
   {"id": 69, "src": "/assets/play_images/69.png"},
   {"id": 70, "src": "/assets/play_images/70.png"},
-  {"id": 71, "src": "/assets/play_images/71.png"}
+  {"id": 71, "src": "/assets/play_images/71.png"},
+  {"id": 72, "src": "/assets/play_images/72.jpg"},
+  {"id": 73, "src": "/assets/play_images/73.jpg"},
+  {"id": 74, "src": "/assets/play_images/74.jpg"},
+  {"id": 75, "src": "/assets/play_images/75.png"},
 ]
 export default playImages;
