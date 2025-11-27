@@ -2,19 +2,38 @@
 import Border from '@/app/components/wood-border/border';
 import { useState } from 'react';
 
+interface FileWithMeta {
+    file: File;
+    preview: string;
+    type: 'image' | 'video';
+    title: string;
+    description: string;
+}
+
 export default function CreatePage() {
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<FileWithMeta[]>([]);
     const [isDragging, setIsDragging] = useState(false);
+
+    const createFileWithMeta = (file: File): FileWithMeta => {
+        const preview = URL.createObjectURL(file);
+        const type = file.type.startsWith('image/') ? 'image' : 'video';
+        return {
+            file,
+            preview,
+            type,
+            title: '',
+            description: '',
+        };
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const selectedFiles = Array.from(e.target.files);
-            files.map((file) => {
-                if (file.name === selectedFiles[0].name) {
-                    return;
-                }
-            })
-            setFiles([...files, ...selectedFiles]);
+            const newFiles = selectedFiles
+                .filter((file) => !files.some((f) => f.file.name === file.name))
+                .map(createFileWithMeta);
+            setFiles([...files, ...newFiles]);
+            e.target.value = '';
         }
     };
 
@@ -34,56 +53,55 @@ export default function CreatePage() {
 
         if (e.dataTransfer.files) {
             const droppedFiles = Array.from(e.dataTransfer.files);
-            // 이미지와 비디오만 필터링
             const validFiles = droppedFiles
-            .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
-            .filter((file) => !files.some((existingFile) => existingFile.name === file.name));
+                .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
+                .filter((file) => !files.some((f) => f.file.name === file.name))
+                .map(createFileWithMeta);
             setFiles([...files, ...validFiles]);
         }
     };
 
     const handleRemoveFile = (index: number) => {
+        URL.revokeObjectURL(files[index].preview);
         setFiles(files.filter((_, i) => i !== index));
+    };
+
+    const handleMetaChange = (index: number, field: 'title' | 'description', value: string) => {
+        const newFiles = [...files];
+        newFiles[index][field] = value;
+        setFiles(newFiles);
     };
 
     const handleBoxClick = () => {
         document.getElementById('fileInput')?.click();
     };
+
+
+    const handleSubmit = () => {
+        console.log('Submitting files with metadata:', files);
+    }
+
     return (
-        <div className="p-0 flex flex-col items-center justify-center w-full h-full">
-            <div className="relative w-2/3 h-64">
-                <Border/>
+        <div className="flex flex-col w-full h-full p-4 md:p-6 gap-6">
+            {/* 파일 업로드 영역 */}
+            <div className="relative w-full max-w-4xl mx-auto flex-shrink-0">
+                <Border />
                 <div
                     onClick={handleBoxClick}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className="w-full h-full gap-5 items-center justify-center text-white text-lg lg:text-2xl cursor-pointer p-5 bg-box-background"
+                    className={`w-full h-32 md:h-40 flex items-center justify-center cursor-pointer bg-box-background transition-all ${
+                        isDragging ? 'brightness-110 scale-[1.02]' : ''
+                    }`}
                 >
-                    <div className="flex flex-col gap-3 w-full h-full font-bold text-lg font-esamanru text-[#5c2500]">
-                        {files.length > 0 ? (
-                        <div className="overflow-scroll overflow-x-hidden pl-3">
-                            {files.map((file, index) => (
-                                <div className="flex items-center justify-between font-esamanru text-[#5c2500] mb-1" key={index}>
-                                    <span>
-                                        {file.name} ({file.type.startsWith('image/') ? '이미지' : '비디오'})
-                                    </span>
-                            <button
-                                onClick={() => handleRemoveFile(index)}
-                                className="text-red-500 hover:text-red-900 text-xl cursor-pointer"
-                            >
-                                ❌
-                            </button>
-                            </div>
-                            ))}
-                        </div>
-                        ) : (
-                            <span>파일 던지거나 클릭해 등록하세요!</span>
-                        )}
-                        
+                    <div className="text-center font-esamanru font-bold text-[#5c2500] px-4">
+                        <p className="text-lg md:text-2xl mb-2">파일을 드래그하거나 클릭하세요</p>
+                        <p className="text-xs md:text-sm opacity-70">이미지 / 비디오 파일만 업로드</p>
                     </div>
                 </div>
             </div>
+
             <input
                 id="fileInput"
                 type="file"
@@ -92,10 +110,109 @@ export default function CreatePage() {
                 onChange={handleFileChange}
                 className="hidden"
             />
-            <div className='relative mt-5'>
-                <Border/>
-                <button className='px-8 py-5 bg-box-background font-bold font-esamanru text-[#5c2500]'>전시하기</button>
-            </div>
+
+            {/* 파일 목록 및 메타 정보 입력 - 스크롤 영역 */}
+            {files.length > 0 && (
+                <div className="flex-1 overflow-y-auto w-full max-w-4xl mx-auto">
+                    <div className="space-y-4 md:space-y-6 pr-2">
+                        {files.map((fileData, index) => (
+                            <div key={index} className="relative">
+                                <Border />
+                                <div className="bg-box-background p-3 md:p-6">
+                                    <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                                        {/* 프리뷰 영역 */}
+                                        <div className="flex-shrink-0 w-full md:w-48 h-48 bg-white rounded-lg overflow-hidden border-2 border-[rgba(92,64,51,0.3)]">
+                                            {fileData.type === 'image' ? (
+                                                <img
+                                                    src={fileData.preview}
+                                                    alt="preview"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <video
+                                                    src={fileData.preview}
+                                                    className="w-full h-full object-cover"
+                                                    controls
+                                                />
+                                            )}
+                                        </div>
+
+                                        {/* 메타 정보 입력 영역 */}
+                                        <div className="flex-1 space-y-1">
+                                            <div className="flex items-start md:items-center justify-between flex-col md:flex-row gap-2">
+                                                <div className="flex items-start gap-3 md:gap-5 flex-col md:flex-row">
+                                                    <div className='flex items-center'> 
+                                                        <span className="text-xs font-esamanru font-bold text-[#5c2500]">
+                                                            업로드 타입 : 
+                                                        </span>
+                                                        <span className="pl-2 text-xs font-esamanru font-bold text-[#5c2500]">
+                                                            {fileData.type === 'image' ? '이미지' : '비디오'}
+                                                        </span>
+                                                    </div>
+                                                    <div className='flex items-center'>
+                                                        <span className="text-xs font-esamanru font-bold text-[#5c2500]">
+                                                            파일명 : 
+                                                        </span>
+                                                        <span className="pl-2 text-xs font-esamanru text-[#8b6f47] truncate max-w-[200px] md:max-w-xs">
+                                                            {fileData.file.name}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleRemoveFile(index);
+                                                    }}
+                                                    className="text-lg md:text-lg hover:scale-110 transition-transform self-start md:self-auto"
+                                                >
+                                                    ❌
+                                                </button>
+                                            </div>
+
+                                            <div>
+                                                <label className="block font-esamanru font-bold text-[#5c2500] mb-2 text-sm md:text-base">
+                                                    제목
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={fileData.title}
+                                                    onChange={(e) => handleMetaChange(index, 'title', e.target.value)}
+                                                    maxLength={20}
+                                                    placeholder="제목을 입력하세요 (필수)"
+                                                    className="w-full placeholder:text-[#8b6f47] bg-transparent px-3 md:px-4 py-2 border-4 border-[rgba(92,64,51,0.3)] font-esamanru text-[#5c2500] text-sm md:text-base focus:outline-none focus:border-[#cc6f04]"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block font-esamanru font-bold text-[#5c2500] mb-2 text-sm md:text-base">
+                                                    설명
+                                                </label>
+                                                <textarea
+                                                    value={fileData.description}
+                                                    onChange={(e) => handleMetaChange(index, 'description', e.target.value)}
+                                                    placeholder="설명을 입력하세요"
+                                                    rows={3}
+                                                    className="w-full placeholder:text-[#8b6f47] bg-transparent px-3 md:px-4 py-2 border-4 border-[rgba(92,64,51,0.3)] font-esamanru text-[#5c2500] text-sm md:text-base resize-none focus:outline-none focus:border-[#cc6f04] transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* 전시하기 버튼 */}
+            {files.length > 0 && (
+                <div onClick={()=> handleSubmit()} className="relative w-full max-w-4xl mx-auto flex-shrink-0">
+                    <Border />
+                    <button className="w-full py-4 md:py-5 bg-box-background font-bold font-esamanru text-[#5c2500] text-lg md:text-xl">
+                        전시하기 ({files.length}개 파일)
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
