@@ -13,6 +13,7 @@ interface FileWithMeta {
 export default function CreatePage() {
     const [files, setFiles] = useState<FileWithMeta[]>([]);
     const [isDragging, setIsDragging] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const createFileWithMeta = (file: File): FileWithMeta => {
         const preview = URL.createObjectURL(file);
@@ -77,11 +78,45 @@ export default function CreatePage() {
     };
 
 
-    const handleSubmit = () => {
-        console.log('Submitting files with metadata:', files);
+    const handleSubmit = async () => {
+        const formData = new FormData();
+        files.forEach((fileData) => {
+            formData.append('file', fileData.file);
+            formData.append('titles', fileData.title);
+            formData.append('descriptions', fileData.description || '');
+        });
+
+        try {
+            setLoading(true);
+            const response = await fetch (`${process.env.NEXT_PUBLIC_API_BASE_URL}assets`, {
+                method: 'POST',
+                body: formData,
+            });
+            console.log('Upload response:', response);
+            // 업로드 후 상태 초기화
+            if (response.ok) {
+                setFiles([]);
+                alert('업로드 성공!');
+            } else {
+                alert('업로드 실패!');
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
+    <>  
+        {loading && (
+            <div className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center'>
+                <div className='font-esamanru font-bold text-white text-2xl animate-pulse'>
+                    노예 일상 추가 중...
+                </div>
+            </div>
+        )}
+        
         <div className="flex flex-col w-full h-full p-4 md:p-6 gap-6">
             {/* 파일 업로드 영역 */}
             <div className="relative w-full max-w-4xl mx-auto flex-shrink-0">
@@ -98,6 +133,7 @@ export default function CreatePage() {
                     <div className="text-center font-esamanru font-bold text-[#5c2500] px-4">
                         <p className="text-lg md:text-2xl mb-2">파일을 드래그하거나 클릭하세요</p>
                         <p className="text-xs md:text-sm opacity-70">이미지 / 비디오 파일만 업로드</p>
+                        <p className="text-xs md:text-xs opacity-70">@ 100MB 이하 / 최대 100개</p>
                     </div>
                 </div>
             </div>
@@ -139,7 +175,7 @@ export default function CreatePage() {
 
                                         {/* 메타 정보 입력 영역 */}
                                         <div className="flex-1 space-y-1">
-                                            <div className="flex items-start md:items-center justify-between flex-col md:flex-row gap-2">
+                                            <div className="flex items-start md:items-center justify-between flex-wrap gap-2">
                                                 <div className="flex items-start gap-3 md:gap-5 flex-col md:flex-row">
                                                     <div className='flex items-center'> 
                                                         <span className="text-xs font-esamanru font-bold text-[#5c2500]">
@@ -208,11 +244,12 @@ export default function CreatePage() {
             {files.length > 0 && (
                 <div onClick={()=> handleSubmit()} className="relative w-full max-w-4xl mx-auto flex-shrink-0">
                     <Border />
-                    <button className="w-full py-4 md:py-5 bg-box-background font-bold font-esamanru text-[#5c2500] text-lg md:text-xl">
-                        전시하기 ({files.length}개 파일)
+                    <button disabled={loading} className="w-full py-4 md:py-5 bg-box-background font-bold font-esamanru text-[#5c2500] text-lg md:text-xl">
+                        {loading ? '노예 일상 추가 중...' : `전시하기 (${files.length}개 파일)`}
                     </button>
                 </div>
             )}
         </div>
+    </>
     );
 }
