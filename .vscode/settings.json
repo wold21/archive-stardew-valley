@@ -4,7 +4,7 @@
         "**/.pnp.*": true
     },
     "css.lint.unknownAtRules": "ignore",
-    "tailwindCSS.experimental.configFile": "src/app/globals.css",
+    "tailwindCSS.experimental.configFile": "tailwind.config.ts",
     "tailwindCSS.classAttributes": ["class", "className"],
     "css.customData": [".vscode/tailwind.json"]
 }
