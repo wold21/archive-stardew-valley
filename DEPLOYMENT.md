@@ -210,6 +210,56 @@ docker inspect --format='{{.State.Health.Status}}' stardew-archive
 
 ---
 
+## 🌐 Nginx 리버스 프록시 설정 (중요!)
+
+### 문제: 404 에러 발생 원인
+
+-   API 호출 시 `undefined` 포함: 빌드 시 환경변수가 제대로 주입되지 않음
+-   `/assets/` 경로 404: Nginx가 자체 html 폴더를 보지만, 실제 파일은 Next.js 컨테이너 안에 있음
+
+### 해결: Nginx 설정 수정
+
+**기존 설정 (문제):**
+
+```nginx
+location /assets/ {
+    root /usr/share/nginx/html;  # ❌ 잘못된 경로
+    expires 30d;
+}
+```
+
+**올바른 설정:**
+
+```nginx
+location /assets/ {
+    # ✅ Next.js 컨테이너로 프록시
+    proxy_pass http://host.docker.internal:52000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # 정적 파일 캐싱
+    add_header Cache-Control "public, max-age=2592000";
+}
+```
+
+**완전한 Nginx 설정 예시는 `nginx-config-example.conf` 파일을 참고하세요.**
+
+### Nginx 설정 적용
+
+```bash
+# 설정 파일 문법 체크
+sudo nginx -t
+
+# Nginx 재시작
+sudo systemctl reload nginx
+# 또는
+sudo nginx -s reload
+```
+
+---
+
 ## 🔮 향후 작업 (Jenkins CI/CD)
 
 Jenkins 파이프라인 구축 시 다음 단계로 자동화 가능:

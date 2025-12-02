@@ -19,12 +19,20 @@ WORKDIR /app
 # pnpm 설치
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# 빌드 시 필요한 환경변수 ARG로 받기
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_ASSET_BASE_URL
+
 # deps 단계에서 설치한 node_modules 복사
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Next.js telemetry 비활성화
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# 빌드 시 환경변수 설정
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_ASSET_BASE_URL=${NEXT_PUBLIC_ASSET_BASE_URL}
 
 # 프로덕션 빌드
 RUN pnpm build
