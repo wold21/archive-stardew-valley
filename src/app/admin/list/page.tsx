@@ -3,15 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Asset } from '@/types/asset';
 import AdminCard from '@/app/components/card/AdminCard';
-
-interface ApiResponse {
-    data: {
-        items: Asset[];
-        total: number;
-        offset: number;
-        limit: number;
-    };
-}
+import { ApiResponse } from '@/types/common';
+import Masonry from 'react-masonry-css';
 
 export default function ListPage() {
     const [items, setItems] = useState<Asset[]>([]);
@@ -31,8 +24,6 @@ export default function ListPage() {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}assets?offset=${currentOffset}&limit=${LIMIT}`);
             const result: ApiResponse = await response.json();
-            console.log('Fetched assets:', result.data.items);
-            // console.log(`${process.env.NEXT_PUBLIC_ASSET_BASE_URL}/${items[0].thumbnailPath}`)
             if (result.data.items.length === 0) {
                 setHasMore(false);
             } else {
@@ -83,8 +74,16 @@ export default function ListPage() {
                         </div>
                     </div>
                 )}
-            <div className="columns-2 md:columns-3 lg:columns-5 gap-4 space-y-4">
-                {items.map(item => (
+            <Masonry
+                breakpointCols={{
+                    default: 5,
+                    1024: 3,
+                    768: 2
+                }}
+                className="flex -ml-6 w-auto"
+                columnClassName="pl-6 bg-clip-padding"
+            >
+                {items.map((item) => (
                     <AdminCard 
                         key={item.id}
                         id={item.id}
@@ -95,7 +94,21 @@ export default function ListPage() {
                         fileType={item.fileType}
                     />
                 ))}
-            </div>
+                {/* 로딩 스켈레톤 */}
+                {loading && [...Array(LIMIT)].map((_, i) => (
+                    <div 
+                        key={`skeleton-${i}`} 
+                        className="break-inside-avoid mb-4 animate-[fadeIn_0.5s_ease-in-out]">
+                        <div className="bg-brownwood bg-size-[100%_100%] bg-center p-2 rounded-lg">
+                            <div className="relative overflow-hidden border-2 border-[rgba(92,64,51,0.3)] rounded h-48 bg-gray-400 animate-pulse"></div>
+                            <div className="bg-gradient-to-b from-[#e2985f] via-[#f3be6d] to-[#e2985f] p-3 mt-2 border-2 border-[rgba(92,64,51,0.2)]">
+                                <div className="h-4 bg-gray-400 rounded animate-pulse mb-2"></div>
+                                <div className="h-3 bg-gray-400 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </Masonry>
 
             {/* 무한 스크롤 트리거 */}
             <div ref={loadMoreRef} className="w-full py-8 flex justify-center">
