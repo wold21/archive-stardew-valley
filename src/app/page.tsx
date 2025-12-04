@@ -19,7 +19,7 @@ export default function Home() {
     const loadMoreRef = useRef<HTMLDivElement>(null);
     const isInitialMount = useRef(true);
 
-    const LIMIT = 20;
+    let LIMIT = 20;
 
     const fetchAssets = useCallback(
         async (currentOffset: number) => {
