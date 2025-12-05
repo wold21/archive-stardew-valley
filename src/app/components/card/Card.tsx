@@ -24,8 +24,8 @@ export default function Card({ id, thumbnailPath, filePath, title, description, 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
-    const mainPath = `${process.env.NEXT_PUBLIC_ASSET_BASE_URL}/${filePath}`;
-    const thumbPath = `${process.env.NEXT_PUBLIC_ASSET_BASE_URL}/${thumbnailPath}`;
+    const mainPath = `${process.env.NEXT_PUBLIC_ASSET_BASE_URL}${filePath}`;
+    const thumbPath = `${process.env.NEXT_PUBLIC_ASSET_BASE_URL}${thumbnailPath}`;
     console.log('Card Rendered:', { id, thumbnailPath, filePath, title, description, fileType });
 
     // 메뉴 외부 클릭 시 닫기
