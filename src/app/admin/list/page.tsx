@@ -6,74 +6,35 @@ import AdminCard from '@/app/components/card/Card';
 import { ApiResponse } from '@/types/common';
 import Masonry from 'react-masonry-css';
 import Card from '@/app/components/card/Card';
+import { useInfiniteAssets } from '@/hooks/useInfiniteAssets';
 
 export default function ListPage() {
-    const [items, setItems] = useState<Asset[]>([]);
-    const [offset, setOffset] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
-    const observerRef = useRef<IntersectionObserver | null>(null);
+    const LIMIT = 20;
+    const { items, isLoading, hasMore, loadMore, mutate } = useInfiniteAssets(LIMIT);
     const loadMoreRef = useRef<HTMLDivElement>(null);
-    const isInitialMount = useRef(true);
-
-    const LIMIT = 50;
-
-    const fetchAssets = useCallback(
-        async (currentOffset: number) => {
-            if (loading) return;
-
-            setLoading(true);
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}assets?offset=${currentOffset}&limit=${LIMIT}`
-                );
-                const result: ApiResponse = await response.json();
-                if (result.data.items.length === 0) {
-                    setHasMore(false);
-                } else {
-                    setItems((prev) => [...prev, ...result.data.items]);
-                    setOffset(currentOffset + LIMIT);
-                }
-            } catch (error) {
-                console.error('Failed to fetch assets:', error);
-            } finally {
-                setLoading(false);
-            }
-        },
-        [loading]
-    );
-
-    useEffect(() => {
-        if (isInitialMount.current) {
-            isInitialMount.current = false;
-            fetchAssets(0);
-        }
-    }, [fetchAssets]);
 
     useEffect(() => {
         if (!loadMoreRef.current || !hasMore) return;
 
-        observerRef.current = new IntersectionObserver(
+        const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && !loading && hasMore) {
-                    fetchAssets(offset);
+                if (entries[0].isIntersecting && !isLoading && hasMore) {
+                    loadMore();
                 }
             },
-            { threshold: 0.1 }
+            {
+                threshold: 0.1,
+                rootMargin: '50%',
+            }
         );
 
-        observerRef.current.observe(loadMoreRef.current);
-
-        return () => {
-            if (observerRef.current) {
-                observerRef.current.disconnect();
-            }
-        };
-    }, [offset, loading, hasMore, fetchAssets]);
+        observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [hasMore, isLoading, loadMore]);
 
     return (
         <div className="container mx-auto p-6">
-            {items.length === 0 && !loading && (
+            {items.length === 0 && !isLoading && (
                 <div className="w-full py-8 flex justify-center items-center">
                     <div className="font-esamanru font-bold text-[#8b6f47] text-lg">
                         노예들의 일상이 아직 하나도 없어요.
@@ -98,10 +59,12 @@ export default function ListPage() {
                         title={item.title}
                         description={item.description}
                         fileType={item.fileType}
+                        onUpdate={() => mutate()}
+                        onDelete={() => mutate()}
                     />
                 ))}
                 {/* 로딩 스켈레톤 */}
-                {loading &&
+                {isLoading &&
                     [...Array(LIMIT)].map((_, i) => (
                         <div
                             key={`skeleton-${i}`}
@@ -120,7 +83,7 @@ export default function ListPage() {
 
             {/* 무한 스크롤 트리거 */}
             <div ref={loadMoreRef} className="w-full py-8 flex justify-center">
-                {loading && <div className="font-neodgm font-bold text-[#8b6f47] text-lg">착취 로딩 중...</div>}
+                {isLoading && <div className="font-neodgm font-bold text-[#8b6f47] text-lg">착취 로딩 중...</div>}
                 {!hasMore && items.length > 0 && (
                     <div className="font-esamanru font-bold text-[#e3af66] text-lg">
                         착취 내음 가득한 노예들의 일상을 더 추가해 주세요.

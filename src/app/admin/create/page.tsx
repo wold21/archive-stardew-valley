@@ -1,6 +1,7 @@
 'use client';
 import Border from '@/app/components/wood-border/border';
 import { useState } from 'react';
+import { mutate } from 'swr/_internal';
 
 interface FileWithMeta {
     file: File;
@@ -100,6 +101,10 @@ export default function CreatePage() {
             });
             if (response.ok) {
                 setFiles([]);
+                mutate(
+                    key => typeof key === 'string' && key.includes('assets'),undefined,
+                    { revalidate: true }
+                );
                 alert('업로드 성공!');
             } else {
                 alert('업로드 실패!');

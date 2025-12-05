@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Border from '../wood-border/border';
+import { Asset } from '@/types/asset';
 
 interface EditModalProps {
     id: number;
@@ -34,7 +35,6 @@ export default function EditModal({
         };
         document.addEventListener('keydown', handleEsc);
         document.body.style.overflow = 'hidden';
-
         return () => {
             document.removeEventListener('keydown', handleEsc);
             document.body.style.overflow = 'unset';
@@ -62,10 +62,13 @@ export default function EditModal({
             });
 
             if (response.ok) {
+                alert('수정이 완료되었습니다.');
                 onUpdate?.();
                 onClose();
             } else {
                 alert('수정에 실패했습니다.');
+                onUpdate?.();
+                onClose();
             }
         } catch (error) {
             console.error('Update failed:', error);
@@ -74,6 +77,12 @@ export default function EditModal({
             setIsSaving(false);
         }
     };
+
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement | HTMLVideoElement, Event>) => {
+        onUpdate?.();
+        onClose();
+        alert('왹져의 손길이 닿아버렸슨...\n더 이상 인간의 눈으론 볼 수 없다.');
+    }
 
     return createPortal(
         <div
@@ -87,24 +96,14 @@ export default function EditModal({
                         {/* 프리뷰 영역 */}
                         <div className="flex-shrink-0 w-full md:w-48 h-48 bg-white rounded-lg overflow-hidden border-2 border-[rgba(92,64,51,0.3)]">
                             {type === 'image' ? (
-                                <img src={src} alt={alt} className="w-full h-full object-cover" />
+                                <img src={src} alt={alt} className="w-full h-full object-cover" onError={handleImageError} />
                             ) : (
-                                <video src={src} className="w-full h-full object-cover" controls />
+                                <video src={src} className="w-full h-full object-cover" controls onError={handleImageError}/>
                             )}
                         </div>
 
                         {/* 메타 정보 입력 영역 */}
                         <div className="flex-1 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h2 className="font-esamanru font-bold text-[#5c2500] text-lg">수정하기</h2>
-                                <button
-                                    onClick={onClose}
-                                    className="text-xl hover:scale-110 transition-transform sm:pr-3"
-                                >
-                                    ❌
-                                </button>
-                            </div>
-
                             <div>
                                 <label className="block font-esamanru font-bold text-[#5c2500] mb-2 text-sm md:text-base">
                                     제목

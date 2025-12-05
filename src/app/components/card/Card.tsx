@@ -6,6 +6,8 @@ import ImageModal from '../image-modal/ImageModal';
 import VideoModal from '../video-modal/videoModal';
 import EditModal from '../edit-modal/EditModal';
 import Border from '../wood-border/border';
+import { Asset } from '@/types/asset';
+import { mutate } from 'swr/_internal';
 
 interface CardProps {
     id: number;
@@ -15,9 +17,10 @@ interface CardProps {
     description?: string;
     fileType: string;
     onUpdate?: () => void;
+    onDelete?: (id: number) => void;
 }
 
-export default function Card({ id, thumbnailPath, filePath, title, description, fileType, onUpdate }: CardProps) {
+export default function Card({ id, thumbnailPath, filePath, title, description, fileType, onUpdate, onDelete }: CardProps) {
     const pathname = usePathname();
     const isAdmin = pathname.includes('/admin');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,7 +29,6 @@ export default function Card({ id, thumbnailPath, filePath, title, description, 
     const menuRef = useRef<HTMLDivElement>(null);
     const mainPath = `${process.env.NEXT_PUBLIC_ASSET_BASE_URL}${filePath}`;
     const thumbPath = `${process.env.NEXT_PUBLIC_ASSET_BASE_URL}${thumbnailPath}`;
-    console.log('Card Rendered:', { id, thumbnailPath, filePath, title, description, fileType });
 
     // 메뉴 외부 클릭 시 닫기
     useEffect(() => {
@@ -49,14 +51,17 @@ export default function Card({ id, thumbnailPath, filePath, title, description, 
 
     const handleDelete = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!confirm('노예의 삭제된 기억은 다시 돌아올 수 없슴...')) return;
+        if (!confirm('삭제된 기억은 돌아오지 않음.')) return;
 
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}assets/${id}`, {
                 method: 'DELETE',
             });
             if (response.ok) {
-                onUpdate?.();
+                onDelete?.(id);
+            } else if(response.status === 404){
+                alert('왹져의 손길이 닿아버렸슨...\n더 이상 인간의 눈으론 볼 수 없다.');
+                onDelete?.(id);
             } else {
                 alert('삭제에 실패했습니다.');
             }
@@ -119,13 +124,13 @@ export default function Card({ id, thumbnailPath, filePath, title, description, 
                                         <Border />
                                         <button
                                             onClick={handleEdit}
-                                            className="w-full pl-5 pt-4 pb-3 text-left font-esamanru text-[#5c2500] hover:bg-[rgba(92,64,51,0.1)] transition-colors"
+                                            className="w-full pl-5 pt-3 pb-2.5 text-left font-bold font-neodgm text-[#5c2500] hover:bg-[rgba(92,64,51,0.1)] transition-colors"
                                         >
                                             <span>수정</span>
                                         </button>
                                         <button
                                             onClick={handleDelete}
-                                            className="w-full pl-5 pt-3.5 pb-3 text-left font-esamanru text-[#5c2500] hover:bg-[rgba(92,64,51,0.1)] transition-colors"
+                                            className="w-full pl-5 pt-3 pb-3 text-left font-bold font-neodgm text-[#5c2500] hover:bg-[rgba(92,64,51,0.1)] transition-colors"
                                         >
                                             <span>삭제</span>
                                         </button>
@@ -145,11 +150,11 @@ export default function Card({ id, thumbnailPath, filePath, title, description, 
                         </div>
 
                         <div className="bg-gradient-to-b from-[#e2985f] via-[#f3be6d] to-[#e2985f] p-3 mt-2 border-2 border-[rgba(92,64,51,0.2)]">
-                            <h3 className="font-neodgm font-bold text-shadow text-sm text-[#5c2500] tracking-wider">
+                            <h3 className="font-neodgm font-bold text-shadow-sm text-sm text-[#5c2500] tracking-wider">
                                 {title}
                             </h3>
                             {description && (
-                                <p className="font-neodgm font-light text-shadow text-xs mt-2 text-[#8b6f47] leading-relaxed whitespace-pre-wrap break-words line-clamp-[10]">
+                                <p className="font-neodgm font-light text-shadow-sm text-xs mt-2 text-[#8b6f47] leading-relaxed whitespace-pre-wrap break-words line-clamp-[10]">
                                     {description}
                                 </p>
                             )}
