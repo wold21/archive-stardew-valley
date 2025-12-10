@@ -13,7 +13,8 @@ const config: Config = {
                 '2xl': '1600px',
             },
             backgroundImage: {
-                forest: "url('/assets/images/main-lg.jpg')",
+                day: "url('/assets/images/main-lg.jpg')",
+                night: "url('/assets/images/main-lg-night.jpg')",
                 lightwood: "url('/assets/images/lightWood.svg')",
                 brownwood: "url('/assets/images/brownWood.svg')",
                 'box-background': 'linear-gradient(to bottom, #e2985f, #f3be6d, #e2985f)',

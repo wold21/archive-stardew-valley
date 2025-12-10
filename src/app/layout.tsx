@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Background from './components/background/background';
 
 export const metadata: Metadata = {
     title: '착취의 들판, 프롤레타리아 농장',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className="antialiased bg-forest bg-cover bg-center" suppressHydrationWarning>{children}</body>
+            <body className="antialiased" suppressHydrationWarning>
+                <Background>{children}</Background>
+            </body>
         </html>
     );
 }
