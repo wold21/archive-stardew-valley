@@ -39,7 +39,6 @@ export default function Jukebox() {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.load();
       audioRef.current.play().then(() => {
         setIsPlaying(true);
       });
@@ -51,10 +50,16 @@ export default function Jukebox() {
       const newIndex = prev - 1;
       return newIndex < 0 ? currentMusicList.length - 1 : newIndex;
     });
+    if (!isPlaying) {
+      setIsPlaying(true);
+    }
   };
 
   const handleNextTrack = () => {
     setCurrentTrackIndex((prev) => (prev + 1) % currentMusicList.length);
+    if (!isPlaying) {
+      setIsPlaying(true);
+    }
   };
 
   const handleTrackEnd = () => {
