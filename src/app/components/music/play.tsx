@@ -108,6 +108,7 @@ export function VolumeControl({ volume, onChangeVolume }: VolumeControlProps) {
       max="100"
       value={volume}
       onChange={(e) => onChangeVolume(Number(e.target.value))}
+      onInput={(e) => onChangeVolume(Number(e.currentTarget.value))}
       className="w-20 h-1 bg-[#8B4513] rounded-lg appearance-none cursor-pointer accent-[#D2691E]"
       style={{
         background: `linear-gradient(to right, #D2691E ${volume}%, #D2691E ${volume}%, #8B4513 30%, #8B4513 100%)`,

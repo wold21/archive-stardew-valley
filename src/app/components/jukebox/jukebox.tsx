@@ -12,7 +12,7 @@ import Border from "../wood-border/border";
 import { useTime } from "@/contexts/time-context";
 
 export default function Jukebox() {
-  const [volume, setVolume] = useState(30);
+  const [volume, setVolume] = useState(20);
   const { isNight } = useTime();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -62,8 +62,6 @@ export default function Jukebox() {
   };
 
   useEffect(() => {
-    setCurrentTrackIndex(Math.floor(Math.random() * currentMusicList.length));
-
     if (isPlaying && audioRef.current && currentPath) {
       audioRef.current.load();
       audioRef.current.play();
