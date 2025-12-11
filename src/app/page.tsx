@@ -1,15 +1,11 @@
 'use client';
 
 import Card from './components/card/Card';
-import playImages from './images';
 
-import { redirect } from 'next/navigation';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Asset } from '@/types/asset';
-import AdminCard from '@/app/components/card/Card';
-import { ApiResponse } from '@/types/common';
+import { useEffect, useRef } from 'react';
 import Masonry from 'react-masonry-css';
 import { useInfiniteAssets } from '@/hooks/useInfiniteAssets';
+import Setting from './components/settings/setting';
 
 export default function Home() {
     const LIMIT = 50;
@@ -36,12 +32,7 @@ export default function Home() {
     }, [hasMore, isLoading, loadMore]);
     return (
         <>
-            <div
-                onClick={() => redirect('/admin')}
-                className="absolute bottom-5 right-5 w-10 h-10 bg-black opacity-50 rounded-full flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity z-50"
-            >
-                <span className="text-white text-2xl">⚙️</span>
-            </div>
+            <Setting />
             <div className="h-screen bg-forest bg-cover bg-center bg-fixed overflow-y-auto">
                 <div className="container mx-auto p-6">
                     {items.length === 0 && !isLoading && (

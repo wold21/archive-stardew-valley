@@ -104,3 +104,36 @@ html {
 .animate-twinkle {
   animation: twinkle 2s ease-in-out infinite;
 }
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll-left 8s linear infinite;
+  white-space: nowrap;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #8b4513;
+  cursor: pointer;
+  border: 2px solid #d2691e;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #8b4513;
+  cursor: pointer;
+  border: 2px solid #d2691e;
+}

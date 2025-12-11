@@ -4,17 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Border from '../components/wood-border/border';
 import { redirect } from 'next/navigation';
+import Setting from '../components/settings/setting';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     return (
         <>
-            <div
-                onClick={() => redirect('/')}
-                className="absolute bottom-5 right-5 w-10 h-10 bg-black opacity-50 rounded-full flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity z-50"
-            >
-                <span className="text-white text-2xl">⚙️</span>
-            </div>
+            <Setting />
             <div className="lg:flex h-screen bg-forest bg-cover bg-center">
                 {!isMenuOpen && (
                     <button
