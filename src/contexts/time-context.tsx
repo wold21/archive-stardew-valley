@@ -11,7 +11,10 @@ interface TimeContextType {
 const TimeContext = createContext<TimeContextType | undefined>(undefined);
 
 export function TimeProvider({ children }: { children: ReactNode }) {
-  const [isNight, setIsNight] = useState(false);
+  const [isNight, setIsNight] = useState(() => {
+    const hour = new Date().getHours();
+    return hour >= 19 || hour < 6;
+  });
 
   return (
     <TimeContext.Provider value={{ isNight, setIsNight }}>
