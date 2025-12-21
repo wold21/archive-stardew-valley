@@ -45,7 +45,7 @@ export default function ListPage() {
                 breakpointCols={{
                     default: 5,
                     1024: 3,
-                    768: 2,
+                    768: 1,
                 }}
                 className="flex -ml-6 w-auto"
                 columnClassName="pl-6 bg-clip-padding"
