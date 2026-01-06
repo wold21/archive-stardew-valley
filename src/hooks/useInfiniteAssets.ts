@@ -1,7 +1,7 @@
 "use client";
 import useSWRInfinite from "swr/infinite";
 import { fetcher } from "@/lib/fetcher";
-import { ApiResponse } from "@/types/common";
+import { ApiResponse, FetchError } from "@/types/common";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -24,8 +24,8 @@ export function useInfiniteAssets(limit: number = 20) {
 
   useEffect(() => {
     if (error) {
-      const status = (error as any)?.status;
-      const message = (error as any)?.message;
+      const status = (error as FetchError)?.status;
+      const message = (error as FetchError)?.message;
 
       // 400, 500, 502 에러 시 에러 페이지로 이동
       if (status === 400 || status === 500 || status === 502) {
